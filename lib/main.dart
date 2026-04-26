@@ -667,7 +667,7 @@ class _TrendingTabState extends State<TrendingTab> {
                       ),
                     ),
                     Text(
-                      "5 randomly picked hot tracks",
+                      "Click Refresh to get live charts 🔺 ",
                       style: TextStyle(
                         color: Colors.white60,
                         fontSize: 13,
