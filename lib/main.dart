@@ -300,15 +300,6 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          if (_currentIndex == 0)
-            Builder(
-              builder: (ctx) => IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => Scaffold.of(ctx).openDrawer(),
-              ),
-            ),
-        ],
       ),
       drawer: _buildDrawer(context),
       body: Container(
@@ -667,7 +658,7 @@ class _TrendingTabState extends State<TrendingTab> {
                       ),
                     ),
                     Text(
-                      "Click Refresh to get live charts 🔺 ",
+                      "Click Refresh to get live charts 🔺",
                       style: TextStyle(
                         color: Colors.white60,
                         fontSize: 13,
@@ -969,7 +960,7 @@ class _MixerTabState extends State<MixerTab> {
               ),
               const SizedBox(height: 6),
               Text(
-                "Mix up to $maxChannels tracks simultaneously. Toggle channels to match your mood.",
+                "Mix up to $maxChannels tracks simultaneously. Toggle channels to match your mood. Ex: Rain+Wind+Fire..etc",
                 style: const TextStyle(color: Colors.white60, fontSize: 13, height: 1.5),
               ),
               const SizedBox(height: 14),
