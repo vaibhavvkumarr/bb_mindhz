@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Binaural Beats',
+      title: 'Binaural Beats 🎧',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       theme: ThemeData.dark(useMaterial3: true),
@@ -95,6 +95,12 @@ const String localJson = '''
     "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-5_byq9i7.jpg"
   },
   {
+    "title": "Birds Sound",
+    "artist": "by Vaibhav Kumar",
+    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592136/music-5_jtvqmp.mp3",
+    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/birds_xbn0me.png"
+  },
+  {
     "title": "Concentration",
     "artist": "by Neha Kulkarni",
     "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592150/music-6_h5dfuc.mp3",
@@ -117,6 +123,12 @@ const String localJson = '''
     "artist": "by Aman Khanna",
     "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592166/music-9_xi0ydi.mp3",
     "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-9_e0t025.jpg"
+  },
+  {
+    "title": "Fire Sound",
+    "artist": "by Vaibhav Kumar",
+    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592166/music-9_xi0ydi.mp3",
+    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/fire_t3xxa4.png"
   },
   {
     "title": "Healing",
@@ -180,9 +192,9 @@ const String localJson = '''
   },
   {
     "title": "Rain Sound",
-    "artist": "by Ritu Saxena",
+    "artist": "by Vaibhav Kumar",
     "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592182/music-20_a5nmnf.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987862/music-20_eejmbh.jpg"
+    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482524/rain_wwht8x.png"
   },
   {
     "title": "Gratitude",
@@ -219,6 +231,18 @@ const String localJson = '''
     "artist": "by Devansh Gupta",
     "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
     "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-26_qevdvf.jpg"
+  },
+  {
+    "title": "Wind Sound",
+    "artist": "by Vaibhav Kumar",
+    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
+    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/wind_yi5em8.png"
+  },
+  {
+    "title": "Waves Sound",
+    "artist": "by Vaibhav Kumar",
+    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
+    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/waves_bjsdry.png"
   },
   {
     "title": "Yog Nidra",
@@ -400,7 +424,7 @@ class _HomePageState extends State<HomePage> {
                           child: Padding(
                             padding: EdgeInsets.all(18),
                             child: Text(
-                              "Binaural Beats",
+                              "Binaural Beats ",
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w600,
@@ -444,7 +468,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const Padding(
-            padding: EdgeInsets.fromLTRB(20, 12, 20, 28),
+            padding: EdgeInsets.fromLTRB(20, 12, 20, 55),
             child: Text(
               "Made By ❤️ India",
               style: TextStyle(
@@ -1571,7 +1595,7 @@ class LinksPage extends StatelessWidget {
       subtitle: "Watch reels from here 🎞️",
       url: "https://www.instagram.com/mrinformative/",
       symbol: "📷",
-      colors: [Color(0xFFFF9966), Color(0xFFFF5E62)],
+      colors: [Color.fromARGB(255, 203, 3, 150), Color.fromARGB(255, 234, 0, 255)],
     ),
     _LinkItem(
       label: "Products",
