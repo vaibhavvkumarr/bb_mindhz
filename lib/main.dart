@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -9,8 +10,123 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+// ================= THEME STORE =================
+class AppThemeStore extends ChangeNotifier {
+  static final AppThemeStore _instance = AppThemeStore._internal();
+  factory AppThemeStore() => _instance;
+  AppThemeStore._internal();
+
+  int _themeIndex = 0;
+  int get themeIndex => _themeIndex;
+
+  // 6 themes: Default (Deep Purple), Ocean Blue, Emerald, Rose, Sunset, Midnight Gold
+  static const List<Map<String, dynamic>> themes = [
+    {
+      'name': 'Default',
+      'emoji': '💜',
+      'seed': Color(0xFF6B21A8),
+      'gradientTop': Color(0xFF0F0F1A),
+      'gradientBottom': Color(0xFF1A1A2E),
+      'accent': Color(0xFF7C3AED),
+      'accentLight': Color(0xFFA78BFA),
+      'navTop': Color(0xFF12122A),
+      'navBottom': Color(0xFF0F0F1A),
+      'navGlow': Color(0xFF4C1D95),
+    },
+    {
+      'name': 'Ocean',
+      'emoji': '🌊',
+      'seed': Color(0xFF0369A1),
+      'gradientTop': Color(0xFF0A0F1A),
+      'gradientBottom': Color(0xFF0F1E2E),
+      'accent': Color(0xFF0EA5E9),
+      'accentLight': Color(0xFF7DD3FC),
+      'navTop': Color(0xFF0A1525),
+      'navBottom': Color(0xFF081018),
+      'navGlow': Color(0xFF075985),
+    },
+    {
+      'name': 'Emerald',
+      'emoji': '💚',
+      'seed': Color(0xFF065F46),
+      'gradientTop': Color(0xFF071A10),
+      'gradientBottom': Color(0xFF0D2B1E),
+      'accent': Color(0xFF10B981),
+      'accentLight': Color(0xFF6EE7B7),
+      'navTop': Color(0xFF071A12),
+      'navBottom': Color(0xFF04110B),
+      'navGlow': Color(0xFF064E3B),
+    },
+    {
+      'name': 'Rose',
+      'emoji': '🌸',
+      'seed': Color(0xFF9D174D),
+      'gradientTop': Color(0xFF1A0A10),
+      'gradientBottom': Color(0xFF2E0F1A),
+      'accent': Color(0xFFF43F5E),
+      'accentLight': Color(0xFFFDA4AF),
+      'navTop': Color(0xFF250A12),
+      'navBottom': Color(0xFF1A0A10),
+      'navGlow': Color(0xFF9D174D),
+    },
+    {
+      'name': 'Sunset',
+      'emoji': '🌅',
+      'seed': Color(0xFF9A3412),
+      'gradientTop': Color(0xFF1A0F0A),
+      'gradientBottom': Color(0xFF2E1A0F),
+      'accent': Color(0xFFF97316),
+      'accentLight': Color(0xFFFDBA74),
+      'navTop': Color(0xFF251508),
+      'navBottom': Color(0xFF1A0F0A),
+      'navGlow': Color(0xFF9A3412),
+    },
+    {
+      'name': 'Gold',
+      'emoji': '✨',
+      'seed': Color(0xFF78350F),
+      'gradientTop': Color(0xFF0F0D00),
+      'gradientBottom': Color(0xFF1C1A08),
+      'accent': Color(0xFFEAB308),
+      'accentLight': Color(0xFFFDE047),
+      'navTop': Color(0xFF1C1A08),
+      'navBottom': Color(0xFF0F0D00),
+      'navGlow': Color(0xFF713F12),
+    },
+  ];
+
+  Map<String, dynamic> get current => themes[_themeIndex];
+
+  void setTheme(int index) {
+    _themeIndex = index;
+    notifyListeners();
+  }
+
+  Color get accent => current['accent'] as Color;
+  Color get accentLight => current['accentLight'] as Color;
+  Color get gradientTop => current['gradientTop'] as Color;
+  Color get gradientBottom => current['gradientBottom'] as Color;
+  Color get navTop => current['navTop'] as Color;
+  Color get navBottom => current['navBottom'] as Color;
+  Color get navGlow => current['navGlow'] as Color;
+  Color get seed => current['seed'] as Color;
+}
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final themeStore = AppThemeStore();
+
+  @override
+  void initState() {
+    super.initState();
+    themeStore.addListener(() => setState(() {}));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +137,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark(useMaterial3: true),
       darkTheme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
+          seedColor: themeStore.seed,
           brightness: Brightness.dark,
         ),
       ),
@@ -54,207 +170,206 @@ class Song {
   }
 
   Map<String, dynamic> toJson() => {
-        'title': title,
-        'artist': artist,
-        'audio': audio,
-        'image': image,
-      };
+    'title': title,
+    'artist': artist,
+    'audio': audio,
+    'image': image,
+  };
 }
 
 // ================= LOCAL JSON (Fallback) =================
 const String localJson = '''
 [
   {
-    "title": "Activate Chakras",
-    "artist": "by Aarav Sharma",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592225/music-1_o9uo5v.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987856/music-1_e1flnn.jpg"
-  },
-  {
-    "title": "Astral Travel",
-    "artist": "by Rohan Verma",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592216/music-2_sek9cu.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987856/music-2_loowfa.jpg"
-  },
-  {
-    "title": "Brain Booster",
-    "artist": "by Ananya Iyer",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766591976/music-3_xyxoy2.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987856/music-3_ib4f1t.jpg"
-  },
-  {
-    "title": "Brain Massage",
-    "artist": "by Kunal Mehta",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592231/music-4_q6q0lh.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-4_dimtab.jpg"
-  },
-  {
-    "title": "Buddha",
-    "artist": "by Siddharth Rao",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592136/music-5_jtvqmp.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-5_byq9i7.jpg"
-  },
-  {
-    "title": "Birds Sound",
-    "artist": "by Vaibhav Kumar",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592136/music-5_jtvqmp.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/birds_xbn0me.png"
-  },
-  {
-    "title": "Concentration",
-    "artist": "by Neha Kulkarni",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592150/music-6_h5dfuc.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-6_zuldqt.jpg"
-  },
-  {
-    "title": "Ekagraman",
-    "artist": "by Arjun Patel",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592167/music-7_abluqr.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-7_nhdolu.jpg"
-  },
-  {
-    "title": "Euphoria",
-    "artist": "by Pooja Nair",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592210/music-8_le9dvd.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987860/music-8_nsy7sf.jpg"
-  },
-  {
-    "title": "Feel Good",
-    "artist": "by Aman Khanna",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592166/music-9_xi0ydi.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-9_e0t025.jpg"
-  },
-  {
-    "title": "Fire Sound",
-    "artist": "by Vaibhav Kumar",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592166/music-9_xi0ydi.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/fire_t3xxa4.png"
-  },
-  {
-    "title": "Healing",
-    "artist": "by Kavya Joshi",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592176/music-10_qswcvt.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-10_l19zg4.jpg"
-  },
-  {
-    "title": "Meditation",
-    "artist": "by Rahul Sengupta",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592152/music-11_nmoh1k.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-11_aq4np4.jpg"
-  },
-  {
-    "title": "Mindfulness",
-    "artist": "by Sneha Banerjee",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592039/music-12_asw12t.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-12_hyewyf.jpg"
-  },
-  {
-    "title": "Manifesting",
-    "artist": "by Aditya Malhotra",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592017/music-13_ebrbuc.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-13_m8flut.jpg"
-  },
-  {
-    "title": "Yes you can",
-    "artist": "by Aditya Malhotra",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592021/music-14_lyzfaq.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-14_qx4l6a.jpg"
-  },
-  {
-    "title": "Mantras",
-    "artist": "by Aditya Malhotra",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592171/music-15_gnetua.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768995054/music-15_knwzss.png"
-  },
-  {
-    "title": "Natraja",
-    "artist": "by Aditya Malhotra",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592161/music-16_ksya1g.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-16_uopwn4.jpg"
-  },
-  {
-    "title": "Negative Aura",
-    "artist": "by Nikhil Arora",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592223/music-17_gz9esg.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987861/music-17_p5pjjj.jpg"
-  },
-  {
-    "title": "OM 432Hz",
-    "artist": "by Nikhil Arora",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592175/music-18_blpoo1.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987860/music-18_fviuqg.jpg"
-  },
-  {
-    "title": "Powerful Thoughts",
-    "artist": "by Ritu Saxena",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592183/music-19_aguv69.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-19_oxv4iy.jpg"
-  },
-  {
-    "title": "Rain Sound",
-    "artist": "by Vaibhav Kumar",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592182/music-20_a5nmnf.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482524/rain_wwht8x.png"
-  },
-  {
-    "title": "Gratitude",
-    "artist": "by Saurabh Mishra",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592072/music-21_rxfurd.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987860/music-21_y7z1jt.jpg"
-  },
-  {
-    "title": "Samadhi",
-    "artist": "by Saurabh Mishra",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592235/music-22_c3nfib.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987860/music-22_ikihpe.jpg"
-  },
-  {
-    "title": "Sleep",
-    "artist": "by Isha Chatterjee",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592098/music-23_s1m63p.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987856/music-23_wi9leo.jpg"
-  },
-  {
-    "title": "3rd Eye",
-    "artist": "by Isha Chatterjee",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592233/music-24_wic3o7.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987857/music-24_ps2pbo.jpg"
-  },
-  {
-    "title": "Vipassana",
-    "artist": "by Devansh Gupta",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592104/music-25_wovdq0.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987857/music-25_eulsep.jpg"
-  },
-  {
-    "title": "Visualize",
-    "artist": "by Devansh Gupta",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-26_qevdvf.jpg"
-  },
-  {
-    "title": "Wind Sound",
-    "artist": "by Vaibhav Kumar",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/wind_yi5em8.png"
-  },
-  {
-    "title": "Waves Sound",
-    "artist": "by Vaibhav Kumar",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/waves_bjsdry.png"
-  },
-  {
-    "title": "Yog Nidra",
-    "artist": "by Devansh Gupta",
-    "audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592230/music-27_du9nnp.mp3",
-    "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-27_tmmi9e.jpg"
-  }
+"title": "Activate Chakras",
+"artist": "by Aarav Sharma",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592225/music-1_o9uo5v.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987856/music-1_e1flnn.jpg"
+},
+{
+"title": "Astral Travel",
+"artist": "by Rohan Verma",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592216/music-2_sek9cu.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987856/music-2_loowfa.jpg"
+},
+{
+"title": "Brain Booster",
+"artist": "by Ananya Iyer",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766591976/music-3_xyxoy2.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987856/music-3_ib4f1t.jpg"
+},
+{
+"title": "Brain Massage",
+"artist": "by Kunal Mehta",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592231/music-4_q6q0lh.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-4_dimtab.jpg"
+},
+{
+"title": "Buddha",
+"artist": "by Siddharth Rao",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592136/music-5_jtvqmp.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-5_byq9i7.jpg"
+},
+{
+"title": "Birds Sound",
+"artist": "by Vaibhav Kumar",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592136/music-5_jtvqmp.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/birds_xbn0me.png"
+},
+{
+"title": "Concentration",
+"artist": "by Neha Kulkarni",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592150/music-6_h5dfuc.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-6_zuldqt.jpg"
+},
+{
+"title": "Ekagraman",
+"artist": "by Arjun Patel",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592167/music-7_abluqr.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-7_nhdolu.jpg"
+},
+{
+"title": "Euphoria",
+"artist": "by Pooja Nair",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592210/music-8_le9dvd.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987860/music-8_nsy7sf.jpg"
+},
+{
+"title": "Feel Good",
+"artist": "by Aman Khanna",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592166/music-9_xi0ydi.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-9_e0t025.jpg"
+},
+{
+"title": "Fire Sound",
+"artist": "by Vaibhav Kumar",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592166/music-9_xi0ydi.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/fire_t3xxa4.png"
+},
+{
+"title": "Healing",
+"artist": "by Kavya Joshi",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592176/music-10_qswcvt.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-10_l19zg4.jpg"
+},
+{
+"title": "Meditation",
+"artist": "by Rahul Sengupta",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592152/music-11_nmoh1k.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-11_aq4np4.jpg"
+},
+{
+"title": "Mindfulness",
+"artist": "by Sneha Banerjee",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592039/music-12_asw12t.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-12_hyewyf.jpg"
+},
+{
+"title": "Manifesting",
+"artist": "by Aditya Malhotra",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592017/music-13_ebrbuc.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-13_m8flut.jpg"
+},
+{
+"title": "Yes you can",
+"artist": "by Aditya Malhotra",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592021/music-14_lyzfaq.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-14_qx4l6a.jpg"
+},
+{
+"title": "Mantras",
+"artist": "by Aditya Malhotra",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592171/music-15_gnetua.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768995054/music-15_knwzss.png"
+},
+{
+"title": "Natraja",
+"artist": "by Aditya Malhotra",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592161/music-16_ksya1g.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-16_uopwn4.jpg"
+},
+{
+"title": "Negative Aura",
+"artist": "by Nikhil Arora",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592223/music-17_gz9esg.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987861/music-17_p5pjjj.jpg"
+},
+{
+"title": "OM 432Hz",
+"artist": "by Nikhil Arora",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592175/music-18_blpoo1.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987860/music-18_fviuqg.jpg"
+},
+{
+"title": "Powerful Thoughts",
+"artist": "by Ritu Saxena",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592183/music-19_aguv69.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987859/music-19_oxv4iy.jpg"
+},
+{
+"title": "Rain Sound",
+"artist": "by Vaibhav Kumar",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592182/music-20_a5nmnf.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482524/rain_wwht8x.png"
+},
+{
+"title": "Gratitude",
+"artist": "by Saurabh Mishra",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592072/music-21_rxfurd.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987860/music-21_y7z1jt.jpg"
+},
+{
+"title": "Samadhi",
+"artist": "by Saurabh Mishra",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592235/music-22_c3nfib.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987860/music-22_ikihpe.jpg"
+},
+{
+"title": "Sleep",
+"artist": "by Isha Chatterjee",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592098/music-23_s1m63p.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987856/music-23_wi9leo.jpg"
+},
+{
+"title": "3rd Eye",
+"artist": "by Isha Chatterjee",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592233/music-24_wic3o7.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987857/music-24_ps2pbo.jpg"
+},
+{
+"title": "Vipassana",
+"artist": "by Devansh Gupta",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592104/music-25_wovdq0.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987857/music-25_eulsep.jpg"
+},
+{
+"title": "Visualize",
+"artist": "by Devansh Gupta",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-26_qevdvf.jpg"
+},
+{
+"title": "Wind Sound",
+"artist": "by Vaibhav Kumar",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/wind_yi5em8.png"
+},
+{
+"title": "Waves Sound",
+"artist": "by Vaibhav Kumar",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/waves_bjsdry.png"
+},
+{
+"title": "Yog Nidra",
+"artist": "by Devansh Gupta",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592230/music-27_du9nnp.mp3",
+"image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1768987858/music-27_tmmi9e.jpg"
+}
 ]
 ''';
 
 // ================= GLOBAL FAVORITES STORE =================
-// Simple in-memory favorites list (survives tab switches within session)
 class FavoritesStore {
   static final FavoritesStore _instance = FavoritesStore._internal();
   factory FavoritesStore() => _instance;
@@ -262,14 +377,57 @@ class FavoritesStore {
 
   final List<Song> favorites = [];
 
-  bool isFavorite(Song song) =>
-      favorites.any((s) => s.audio == song.audio);
+  bool isFavorite(Song song) => favorites.any((s) => s.audio == song.audio);
 
   void toggle(Song song) {
     if (isFavorite(song)) {
       favorites.removeWhere((s) => s.audio == song.audio);
     } else {
       favorites.add(song);
+    }
+  }
+}
+
+// ================= NOTIFICATION / REMINDER STORE =================
+class ReminderStore {
+  static final ReminderStore _instance = ReminderStore._internal();
+  factory ReminderStore() => _instance;
+  ReminderStore._internal();
+
+  bool isEnabled = false;
+  int intervalHours = 1;
+  int intervalMinutes = 0;
+  Timer? _timer;
+
+  /// Callback to show a snackbar / dialog (set by SettingsPage)
+  void Function(String message)? onReminder;
+
+  void start(void Function(String) callback) {
+    onReminder = callback;
+    _timer?.cancel();
+    final duration = Duration(hours: intervalHours, minutes: intervalMinutes);
+    if (duration.inSeconds == 0) return;
+    _timer = Timer.periodic(duration, (_) {
+      onReminder?.call(
+        "🎧 Time to listen to Binaural Beats and relax your mind!",
+      );
+    });
+    isEnabled = true;
+  }
+
+  void stop() {
+    _timer?.cancel();
+    _timer = null;
+    isEnabled = false;
+  }
+
+  String get displayInterval {
+    if (intervalHours > 0 && intervalMinutes > 0) {
+      return "${intervalHours}h ${intervalMinutes}m";
+    } else if (intervalHours > 0) {
+      return "${intervalHours} hour${intervalHours > 1 ? 's' : ''}";
+    } else {
+      return "$intervalMinutes min${intervalMinutes > 1 ? 's' : ''}";
     }
   }
 }
@@ -286,10 +444,12 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   List<Song> songs = [];
   bool isLoading = true;
+  final themeStore = AppThemeStore();
 
   @override
   void initState() {
     super.initState();
+    themeStore.addListener(() => setState(() {}));
     fetchSongs();
   }
 
@@ -311,6 +471,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = themeStore;
     final tabs = [
       SongsTab(songs: songs, isLoading: isLoading),
       TrendingTab(songs: songs, isLoading: isLoading),
@@ -327,9 +488,9 @@ class _HomePageState extends State<HomePage> {
       ),
       drawer: _buildDrawer(context),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF0F0F1A), Color(0xFF1A1A2E)],
+            colors: [theme.gradientTop, theme.gradientBottom],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -340,14 +501,14 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF12122A), Color(0xFF0F0F1A)],
+          gradient: LinearGradient(
+            colors: [theme.navTop, theme.navBottom],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.deepPurple.withOpacity(0.3),
+              color: theme.navGlow.withOpacity(0.3),
               blurRadius: 20,
               offset: const Offset(0, -4),
             ),
@@ -358,7 +519,7 @@ class _HomePageState extends State<HomePage> {
           onTap: (i) => setState(() => _currentIndex = i),
           backgroundColor: Colors.transparent,
           elevation: 0,
-          selectedItemColor: Colors.deepPurpleAccent,
+          selectedItemColor: theme.accentLight,
           unselectedItemColor: Colors.white38,
           type: BottomNavigationBarType.fixed,
           selectedLabelStyle: const TextStyle(
@@ -390,6 +551,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDrawer(BuildContext context) {
+    final theme = themeStore;
     return Drawer(
       child: Column(
         children: [
@@ -437,13 +599,21 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
+                // All Songs — new icon: headphones
                 ListTile(
-                  leading: const Icon(Icons.music_note),
+                  leading: Icon(
+                    Icons.music_note,
+                    color: theme.accentLight,
+                  ),
                   title: const Text("All Songs"),
                   onTap: () => Navigator.pop(context),
                 ),
+                // About — new icon: info_outline rounded
                 ListTile(
-                  leading: const Icon(Icons.info),
+                  leading: Icon(
+                    Icons.tips_and_updates_rounded,
+                    color: theme.accentLight,
+                  ),
                   title: const Text("About"),
                   onTap: () {
                     Navigator.pop(context);
@@ -453,8 +623,12 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
+                // Exclusive — new icon: workspace_premium
                 ListTile(
-                  leading: const Text("💎", style: TextStyle(fontSize: 28)),
+                  leading: Icon(
+                    Icons.workspace_premium_rounded,
+                    color: theme.accentLight,
+                  ),
                   title: const Text("Exclusive"),
                   onTap: () {
                     Navigator.pop(context);
@@ -464,11 +638,23 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
+                // NEW: Settings
+                ListTile(
+                  leading: Icon(Icons.tune_rounded, color: theme.accentLight),
+                  title: const Text("Settings"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SettingsPage()),
+                    );
+                  },
+                ),
               ],
             ),
           ),
           const Padding(
-            padding: EdgeInsets.fromLTRB(20, 12, 20, 55),
+            padding: EdgeInsets.fromLTRB(20, 12, 20, 58),
             child: Text(
               "Made By ❤️ India",
               style: TextStyle(
@@ -484,10 +670,550 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+// ================= SETTINGS PAGE =================
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final themeStore = AppThemeStore();
+  final reminderStore = ReminderStore();
+
+  // Notification reminder state
+  bool _notifEnabled = false;
+  int _selectedHours = 0;
+  int _selectedMinutes = 30;
+  late GlobalKey<ScaffoldMessengerState> _messengerKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _messengerKey = GlobalKey<ScaffoldMessengerState>();
+    _notifEnabled = reminderStore.isEnabled;
+    _selectedHours = reminderStore.intervalHours;
+    _selectedMinutes = reminderStore.intervalMinutes;
+  }
+
+  void _applyReminder() {
+    if (_selectedHours == 0 && _selectedMinutes == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please set a valid interval (> 0 minutes)"),
+        ),
+      );
+      return;
+    }
+    reminderStore.intervalHours = _selectedHours;
+    reminderStore.intervalMinutes = _selectedMinutes;
+    reminderStore.start((msg) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            backgroundColor: themeStore.accent,
+            duration: const Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+    setState(() => _notifEnabled = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("✅ Reminder set every ${reminderStore.displayInterval}"),
+        backgroundColor: Colors.green[700],
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _stopReminder() {
+    reminderStore.stop();
+    setState(() => _notifEnabled = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("🔕 Reminder turned off"),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = themeStore;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Settings"),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [theme.gradientTop, theme.gradientBottom],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          children: [
+            // ---- SECTION: Change Theme ----
+            _sectionHeader(
+              icon: Icons.palette_rounded,
+              label: "Change Theme",
+              color: theme.accentLight,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: _cardDecoration(theme),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Choose your app colour theme",
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.65),
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Theme grid
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: List.generate(AppThemeStore.themes.length, (i) {
+                      final t = AppThemeStore.themes[i];
+                      final isSelected = theme.themeIndex == i;
+                      final accent = t['accent'] as Color;
+                      final accentLight = t['accentLight'] as Color;
+                      return GestureDetector(
+                        onTap: () {
+                          themeStore.setTheme(i);
+                          setState(() {});
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          width: 88,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            gradient: LinearGradient(
+                              colors: [
+                                accent.withOpacity(isSelected ? 0.45 : 0.18),
+                                accentLight.withOpacity(
+                                  isSelected ? 0.22 : 0.06,
+                                ),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            border: Border.all(
+                              color: isSelected
+                                  ? accentLight
+                                  : Colors.white.withOpacity(0.1),
+                              width: isSelected ? 2.2 : 1,
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: accent.withOpacity(0.35),
+                                      blurRadius: 14,
+                                      spreadRadius: 1,
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                t['emoji'] as String,
+                                style: const TextStyle(fontSize: 26),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                t['name'] as String,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w400,
+                                  color: isSelected
+                                      ? accentLight
+                                      : Colors.white60,
+                                ),
+                              ),
+                              if (isSelected) ...[
+                                const SizedBox(height: 4),
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 14,
+                                  color: accentLight,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 14),
+                  // Current theme indicator
+                  Row(
+                    children: [
+                      Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: theme.accent,
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.accent.withOpacity(0.5),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Active: ${AppThemeStore.themes[theme.themeIndex]['name']}",
+                        style: TextStyle(
+                          color: theme.accentLight,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // ---- SECTION: Notifications / Reminder ----
+            _sectionHeader(
+              icon: Icons.notifications_active_rounded,
+              label: "Reminder",
+              color: theme.accentLight,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: _cardDecoration(theme),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Daily Listening Reminder",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _notifEnabled
+                                  ? "🟢 Active · every ${reminderStore.displayInterval}"
+                                  : "Set a custom interval to get reminded",
+                              style: TextStyle(
+                                color: _notifEnabled
+                                    ? Colors.greenAccent
+                                    : Colors.white54,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_notifEnabled)
+                        TextButton(
+                          onPressed: _stopReminder,
+                          child: const Text(
+                            "Turn Off",
+                            style: TextStyle(color: Colors.redAccent),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  // Hours picker
+                  _intervalRow(
+                    label: "Hours",
+                    icon: Icons.hourglass_top_rounded,
+                    value: _selectedHours,
+                    min: 0,
+                    max: 23,
+                    onChanged: (v) => setState(() => _selectedHours = v),
+                    theme: theme,
+                  ),
+                  const SizedBox(height: 4),
+                  // Minutes picker
+                  _intervalRow(
+                    label: "Minutes",
+                    icon: Icons.timer_rounded,
+                    value: _selectedMinutes,
+                    min: 0,
+                    max: 59,
+                    onChanged: (v) => setState(() => _selectedMinutes = v),
+                    theme: theme,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Preview label
+                  Center(
+                    child: Text(
+                      _selectedHours == 0 && _selectedMinutes == 0
+                          ? "Set at least 1 minute"
+                          : "Remind me every ${_buildIntervalLabel()}",
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Set reminder button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: (_selectedHours == 0 && _selectedMinutes == 0)
+                          ? null
+                          : _applyReminder,
+                      icon: const Icon(Icons.alarm_on_rounded),
+                      label: const Text("Set Reminder"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.accent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Center(
+                    child: Text(
+                      "⚠️ Reminders appear as in-app alerts while the app is open.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.35),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _buildIntervalLabel() {
+    if (_selectedHours > 0 && _selectedMinutes > 0) {
+      return "${_selectedHours}h ${_selectedMinutes}m";
+    } else if (_selectedHours > 0) {
+      return "${_selectedHours} hour${_selectedHours > 1 ? 's' : ''}";
+    } else {
+      return "$_selectedMinutes minute${_selectedMinutes > 1 ? 's' : ''}";
+    }
+  }
+
+  Widget _sectionHeader({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 20),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: color,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  BoxDecoration _cardDecoration(AppThemeStore theme) {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(22),
+      gradient: LinearGradient(
+        colors: [
+          Colors.white.withOpacity(0.08),
+          Colors.white.withOpacity(0.03),
+        ],
+      ),
+      border: Border.all(color: Colors.white.withOpacity(0.09)),
+    );
+  }
+
+  Widget _intervalRow({
+    required String label,
+    required IconData icon,
+    required int value,
+    required int min,
+    required int max,
+    required void Function(int) onChanged,
+    required AppThemeStore theme,
+  }) {
+    final presets = label == "Minutes" ? [20, 30, 40, 50] : [2, 4, 8, 12, 16];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Top row: icon + label + stepper controls
+        Row(
+          children: [
+            Icon(icon, size: 18, color: Colors.white54),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 68,
+              child: Text(
+                label,
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ),
+            // Decrement
+            IconButton(
+              onPressed: value > min ? () => onChanged(value - 1) : null,
+              icon: const Icon(Icons.remove_circle_outline_rounded),
+              color: theme.accentLight,
+              iconSize: 22,
+              constraints: const BoxConstraints(),
+              padding: const EdgeInsets.all(4),
+            ),
+            const SizedBox(width: 6),
+            // Value display
+            Container(
+              width: 52,
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: theme.accent.withOpacity(0.2),
+                border: Border.all(color: theme.accent.withOpacity(0.3)),
+              ),
+              child: Text(
+                value.toString().padLeft(2, '0'),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: theme.accentLight,
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            // Increment
+            IconButton(
+              onPressed: value < max ? () => onChanged(value + 1) : null,
+              icon: const Icon(Icons.add_circle_outline_rounded),
+              color: theme.accentLight,
+              iconSize: 22,
+              constraints: const BoxConstraints(),
+              padding: const EdgeInsets.all(4),
+            ),
+          ],
+        ),
+        // Bottom row: quick preset chips indented under label
+        Padding(
+          padding: const EdgeInsets.only(left: 78, top: 6, bottom: 2),
+          child: Row(
+            children: presets
+                .expand(
+                  (p) => [
+                    _presetChip(p, value, onChanged, theme),
+                    const SizedBox(width: 8),
+                  ],
+                )
+                .toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _presetChip(
+    int preset,
+    int current,
+    void Function(int) onChanged,
+    AppThemeStore theme,
+  ) {
+    final selected = current == preset;
+    return GestureDetector(
+      onTap: () => onChanged(preset),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: selected
+              ? theme.accent.withOpacity(0.35)
+              : Colors.white.withOpacity(0.07),
+          border: Border.all(
+            color: selected
+                ? theme.accentLight.withOpacity(0.6)
+                : Colors.white.withOpacity(0.1),
+          ),
+        ),
+        child: Text(
+          "$preset",
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+            color: selected ? theme.accentLight : Colors.white54,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ================= SHARED SONG TILE =================
-Widget buildSongTile(BuildContext context, Song song,
-    {bool showFav = false, VoidCallback? onFavToggle}) {
+Widget buildSongTile(
+  BuildContext context,
+  Song song, {
+  bool showFav = false,
+  VoidCallback? onFavToggle,
+}) {
   final favStore = FavoritesStore();
+  final theme = AppThemeStore();
   return GestureDetector(
     onTap: () {
       Navigator.push(
@@ -521,7 +1247,7 @@ Widget buildSongTile(BuildContext context, Song song,
               errorBuilder: (_, __, ___) => Container(
                 width: 80,
                 height: 80,
-                color: Colors.deepPurple.withOpacity(0.3),
+                color: theme.accent.withOpacity(0.3),
                 child: const Icon(Icons.music_note, color: Colors.white54),
               ),
             ),
@@ -578,10 +1304,10 @@ Widget buildSongTile(BuildContext context, Song song,
             Container(
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [Colors.deepPurple, Colors.blue],
+                  colors: [theme.accent, theme.accentLight],
                 ),
               ),
               child: const Icon(Icons.play_arrow, color: Colors.white),
@@ -652,7 +1378,6 @@ class _TrendingTabState extends State<TrendingTab> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       children: [
-        // Header
         Container(
           margin: const EdgeInsets.only(bottom: 20),
           padding: const EdgeInsets.all(18),
@@ -683,10 +1408,7 @@ class _TrendingTabState extends State<TrendingTab> {
                     ),
                     Text(
                       "Click Refresh to get live charts 🔺",
-                      style: TextStyle(
-                        color: Colors.white60,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Colors.white60, fontSize: 13),
                     ),
                   ],
                 ),
@@ -702,8 +1424,6 @@ class _TrendingTabState extends State<TrendingTab> {
             ],
           ),
         ),
-
-        // Trending song list with rank badges
         ...trendingSongs.asMap().entries.map((entry) {
           final index = entry.key;
           final song = entry.value;
@@ -729,7 +1449,6 @@ class _TrendingTabState extends State<TrendingTab> {
               ),
               child: Row(
                 children: [
-                  // Rank badge
                   Container(
                     width: 44,
                     alignment: Alignment.center,
@@ -741,10 +1460,10 @@ class _TrendingTabState extends State<TrendingTab> {
                         color: index == 0
                             ? Colors.amberAccent
                             : index == 1
-                                ? Colors.grey[400]
-                                : index == 2
-                                    ? Colors.brown[300]
-                                    : Colors.white38,
+                            ? Colors.grey[400]
+                            : index == 2
+                            ? Colors.brown[300]
+                            : Colors.white38,
                       ),
                     ),
                   ),
@@ -759,7 +1478,10 @@ class _TrendingTabState extends State<TrendingTab> {
                         width: 72,
                         height: 72,
                         color: Colors.deepPurple.withOpacity(0.3),
-                        child: const Icon(Icons.music_note, color: Colors.white54),
+                        child: const Icon(
+                          Icons.music_note,
+                          color: Colors.white54,
+                        ),
                       ),
                     ),
                   ),
@@ -802,7 +1524,11 @@ class _TrendingTabState extends State<TrendingTab> {
                             : [Colors.deepPurple, Colors.blue],
                       ),
                     ),
-                    child: const Icon(Icons.play_arrow, color: Colors.white, size: 22),
+                    child: const Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 ],
               ),
@@ -837,8 +1563,10 @@ class _MixerChannel {
 
 class _MixerTabState extends State<MixerTab> {
   static const int maxChannels = 5;
-  final List<_MixerChannel> channels =
-      List.generate(maxChannels, (_) => _MixerChannel());
+  final List<_MixerChannel> channels = List.generate(
+    maxChannels,
+    (_) => _MixerChannel(),
+  );
   bool _masterPlaying = false;
 
   @override
@@ -887,11 +1615,18 @@ class _MixerTabState extends State<MixerTab> {
                   return ListTile(
                     leading: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(s.image, width: 44, height: 44, fit: BoxFit.cover),
+                      child: Image.network(
+                        s.image,
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     title: Text(s.title),
-                    subtitle: Text(s.artist,
-                        style: const TextStyle(color: Colors.white54)),
+                    subtitle: Text(
+                      s.artist,
+                      style: const TextStyle(color: Colors.white54),
+                    ),
                     onTap: () => Navigator.pop(ctx2, s),
                   );
                 },
@@ -920,13 +1655,11 @@ class _MixerTabState extends State<MixerTab> {
 
   Future<void> _toggleMasterPlay() async {
     if (_masterPlaying) {
-      // Pause all enabled
       for (final ch in channels) {
         if (ch.isEnabled && ch.song != null) await ch.player.pause();
       }
       setState(() => _masterPlaying = false);
     } else {
-      // Play all enabled
       for (final ch in channels) {
         if (ch.isEnabled && ch.song != null) await ch.player.play();
       }
@@ -955,7 +1688,6 @@ class _MixerTabState extends State<MixerTab> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        // Header
         Container(
           margin: const EdgeInsets.only(bottom: 20),
           padding: const EdgeInsets.all(18),
@@ -985,10 +1717,13 @@ class _MixerTabState extends State<MixerTab> {
               const SizedBox(height: 6),
               Text(
                 "Mix up to $maxChannels tracks simultaneously. Toggle channels to match your mood. Ex: Rain+Wind+Fire..etc",
-                style: const TextStyle(color: Colors.white60, fontSize: 13, height: 1.5),
+                style: const TextStyle(
+                  color: Colors.white60,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: 14),
-              // Master play button
               Row(
                 children: [
                   Expanded(
@@ -1007,7 +1742,9 @@ class _MixerTabState extends State<MixerTab> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              _masterPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                              _masterPlaying
+                                  ? Icons.pause_rounded
+                                  : Icons.play_arrow_rounded,
                               color: Colors.white,
                             ),
                             const SizedBox(width: 8),
@@ -1045,8 +1782,6 @@ class _MixerTabState extends State<MixerTab> {
             ],
           ),
         ),
-
-        // Channels
         ...List.generate(maxChannels, (i) {
           final ch = channels[i];
           return Container(
@@ -1074,10 +1809,8 @@ class _MixerTabState extends State<MixerTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Channel header row
                 Row(
                   children: [
-                    // Channel number badge
                     Container(
                       width: 32,
                       height: 32,
@@ -1097,7 +1830,6 @@ class _MixerTabState extends State<MixerTab> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // Song info or placeholder
                     Expanded(
                       child: ch.song == null
                           ? Text(
@@ -1131,7 +1863,6 @@ class _MixerTabState extends State<MixerTab> {
                               ],
                             ),
                     ),
-                    // Enable toggle
                     if (ch.song != null)
                       Switch(
                         value: ch.isEnabled,
@@ -1140,15 +1871,13 @@ class _MixerTabState extends State<MixerTab> {
                       ),
                   ],
                 ),
-
                 const SizedBox(height: 10),
-
-                // Pick song + volume row
                 Row(
                   children: [
-                    // Pick track button
                     OutlinedButton.icon(
-                      onPressed: ch.isLoading ? null : () => _pickSongForChannel(i),
+                      onPressed: ch.isLoading
+                          ? null
+                          : () => _pickSongForChannel(i),
                       icon: ch.isLoading
                           ? const SizedBox(
                               width: 12,
@@ -1163,15 +1892,21 @@ class _MixerTabState extends State<MixerTab> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white70,
                         side: BorderSide(color: Colors.white.withOpacity(0.2)),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // Volume slider
                     if (ch.song != null) ...[
-                      const Icon(Icons.volume_down, size: 16, color: Colors.white38),
+                      const Icon(
+                        Icons.volume_down,
+                        size: 16,
+                        color: Colors.white38,
+                      ),
                       Expanded(
                         child: Slider(
                           value: ch.volume,
@@ -1185,7 +1920,11 @@ class _MixerTabState extends State<MixerTab> {
                           inactiveColor: Colors.white12,
                         ),
                       ),
-                      const Icon(Icons.volume_up, size: 16, color: Colors.white38),
+                      const Icon(
+                        Icons.volume_up,
+                        size: 16,
+                        color: Colors.white38,
+                      ),
                     ],
                   ],
                 ),
@@ -1224,10 +1963,7 @@ class _LibraryTabState extends State<LibraryTab> {
                 const SizedBox(height: 16),
                 const Text(
                   "Your Library is Empty",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -1255,7 +1991,10 @@ class _LibraryTabState extends State<LibraryTab> {
             children: [
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
@@ -1307,6 +2046,7 @@ class PlayerPage extends StatefulWidget {
 class _PlayerPageState extends State<PlayerPage> {
   final AudioPlayer player = AudioPlayer();
   final favStore = FavoritesStore();
+  final themeStore = AppThemeStore();
   bool isLoop = false;
   bool isLoadingAudio = true;
 
@@ -1388,8 +2128,12 @@ class _PlayerPageState extends State<PlayerPage> {
                 height: 240,
                 errorBuilder: (_, __, ___) => Container(
                   height: 240,
-                  color: Colors.deepPurple.withOpacity(0.3),
-                  child: const Icon(Icons.music_note, size: 80, color: Colors.white30),
+                  color: themeStore.accent.withOpacity(0.3),
+                  child: const Icon(
+                    Icons.music_note,
+                    size: 80,
+                    color: Colors.white30,
+                  ),
                 ),
               ),
             ),
@@ -1414,7 +2158,6 @@ class _PlayerPageState extends State<PlayerPage> {
               ),
             ),
             const SizedBox(height: 40),
-            // Slider
             StreamBuilder<Duration>(
               stream: player.positionStream,
               builder: (_, snapshot) {
@@ -1427,14 +2170,18 @@ class _PlayerPageState extends State<PlayerPage> {
                       children: [
                         Slider(
                           value: position.inSeconds.toDouble().clamp(
-                              0, duration.inSeconds.toDouble() == 0 ? 1 : duration.inSeconds.toDouble()),
+                            0,
+                            duration.inSeconds.toDouble() == 0
+                                ? 1
+                                : duration.inSeconds.toDouble(),
+                          ),
                           max: duration.inSeconds.toDouble() == 0
                               ? 1
                               : duration.inSeconds.toDouble(),
                           onChanged: (value) {
                             player.seek(Duration(seconds: value.toInt()));
                           },
-                          activeColor: Colors.deepPurple,
+                          activeColor: themeStore.accent,
                           inactiveColor: Colors.grey,
                         ),
                         Row(
@@ -1451,7 +2198,6 @@ class _PlayerPageState extends State<PlayerPage> {
               },
             ),
             const SizedBox(height: 30),
-            // Controls
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1463,16 +2209,17 @@ class _PlayerPageState extends State<PlayerPage> {
                       final playerState = snapshot.data;
                       final isPlaying = playerState?.playing ?? false;
                       final processingState = playerState?.processingState;
-                      final showSpinner = isLoadingAudio ||
+                      final showSpinner =
+                          isLoadingAudio ||
                           processingState == ProcessingState.loading ||
                           processingState == ProcessingState.buffering;
 
                       return Container(
                         padding: const EdgeInsets.all(20),
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            colors: [Colors.deepPurple, Colors.blue],
+                            colors: [themeStore.accent, themeStore.accentLight],
                           ),
                         ),
                         child: showSpinner
@@ -1481,7 +2228,9 @@ class _PlayerPageState extends State<PlayerPage> {
                                 height: 40,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 3,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Icon(
@@ -1500,7 +2249,7 @@ class _PlayerPageState extends State<PlayerPage> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isLoop ? Colors.deepPurple : Colors.grey[800],
+                      color: isLoop ? themeStore.accent : Colors.grey[800],
                     ),
                     child: Icon(
                       isLoop ? Icons.repeat_one : Icons.repeat,
@@ -1517,7 +2266,9 @@ class _PlayerPageState extends State<PlayerPage> {
                 const Text("Wear 🎧", style: TextStyle(color: Colors.grey)),
                 TextButton(
                   onPressed: () {
-                    launchUrl(Uri.parse("https://www.youtube.com/@mr.informative"));
+                    launchUrl(
+                      Uri.parse("https://www.youtube.com/@mr.informative"),
+                    );
                   },
                   child: const Text("Visit YouTube 🔗"),
                 ),
@@ -1588,28 +2339,31 @@ class LinksPage extends StatelessWidget {
       subtitle: "Official website of Mr Informative 🧿",
       url: "https://www.youtube.com/@mr.informative",
       icon: Icons.language_rounded,
-      colors: [Color(0xFF4B6CB7), Color(0xFF182848)],
+      colors: [Color.fromARGB(255, 61, 109, 221), Color.fromARGB(255, 10, 86, 238)],
     ),
     _LinkItem(
       label: "Instagram",
       subtitle: "Watch reels from here 🎞️",
       url: "https://www.instagram.com/mrinformative/",
-      symbol: "📷",
-      colors: [Color.fromARGB(255, 203, 3, 150), Color.fromARGB(255, 234, 0, 255)],
+      symbol: "📱",
+      colors: [
+        Color.fromARGB(255, 203, 3, 150),
+        Color.fromARGB(255, 234, 0, 255),
+      ],
     ),
     _LinkItem(
       label: "Products",
       subtitle: "Visit more from us! 🛍️",
       url: "https://vaibhavvkumarr.github.io/mrinfor",
       symbol: "🛍️",
-      colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+      colors: [Color.fromARGB(255, 221, 254, 34), Color.fromARGB(255, 209, 250, 3)],
     ),
     _LinkItem(
       label: "Developer 👨🏻‍💻",
       subtitle: "Come Say Hey!",
       url: "https://www.instagram.com/vaibhavvkumar/",
       symbol: "🐍",
-      colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+      colors: [Color(0xFF11998E), Color.fromARGB(255, 0, 255, 98)],
     ),
   ];
 
@@ -1653,7 +2407,7 @@ class LinksPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      "Stay connected",
+                      "Stay connected 🔗",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
@@ -1714,13 +2468,14 @@ class LinksPage extends StatelessWidget {
                               height: 56,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                gradient:
-                                    LinearGradient(colors: link.colors),
+                                gradient: LinearGradient(colors: link.colors),
                               ),
                               child: Center(
                                 child: link.symbol != null
-                                    ? Text(link.symbol!,
-                                        style: const TextStyle(fontSize: 28))
+                                    ? Text(
+                                        link.symbol!,
+                                        style: const TextStyle(fontSize: 28),
+                                      )
                                     : Icon(link.icon, color: Colors.white),
                               ),
                             ),
