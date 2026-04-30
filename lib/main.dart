@@ -213,7 +213,7 @@ const String localJson = '''
 {
 "title": "Birds Sound",
 "artist": "by Vaibhav Kumar",
-"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592136/music-5_jtvqmp.mp3",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1777524988/birds_hd37mp.mp3",
 "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/birds_xbn0me.png"
 },
 {
@@ -243,7 +243,7 @@ const String localJson = '''
 {
 "title": "Fire Sound",
 "artist": "by Vaibhav Kumar",
-"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592166/music-9_xi0ydi.mp3",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1777525032/fire_b0c2ob.mp3",
 "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/fire_t3xxa4.png"
 },
 {
@@ -309,7 +309,7 @@ const String localJson = '''
 {
 "title": "Rain Sound",
 "artist": "by Vaibhav Kumar",
-"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592182/music-20_a5nmnf.mp3",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1777524899/rain_htouro.mp3",
 "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482524/rain_wwht8x.png"
 },
 {
@@ -351,13 +351,13 @@ const String localJson = '''
 {
 "title": "Wind Sound",
 "artist": "by Vaibhav Kumar",
-"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1777524907/wind_dyxc9u.mp3",
 "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/wind_yi5em8.png"
 },
 {
-"title": "Waves Sound",
+"title": "Ocean Sound",
 "artist": "by Vaibhav Kumar",
-"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1766592205/music-26_zoowsj.mp3",
+"audio": "https://res.cloudinary.com/dvvbfvvl1/video/upload/v1777524866/ocean_ygq6rp.mp3",
 "image": "https://res.cloudinary.com/dvvbfvvl1/image/upload/v1777482266/waves_bjsdry.png"
 },
 {
@@ -640,7 +640,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 // NEW: Settings
                 ListTile(
-                  leading: Icon(Icons.tune_rounded, color: theme.accentLight),
+                  leading: Icon(Icons.settings, color: theme.accentLight),
                   title: const Text("Settings"),
                   onTap: () {
                     Navigator.pop(context);
@@ -2260,20 +2260,23 @@ class _PlayerPageState extends State<PlayerPage> {
               ],
             ),
             const Spacer(),
-            Row(
+            Padding(
+            padding: const EdgeInsets.only(bottom: 40), // reduce this if there's spacing above
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Wear 🎧", style: TextStyle(color: Colors.grey)),
+                const Text("Plug in 🎧", style: TextStyle(color: Colors.grey)),
                 TextButton(
                   onPressed: () {
                     launchUrl(
                       Uri.parse("https://www.youtube.com/@mr.informative"),
                     );
                   },
-                  child: const Text("Visit YouTube 🔗"),
+                  child: const Text("Visit YouTube 🚀 "),
                 ),
               ],
             ),
+            )
           ],
         ),
       ),
