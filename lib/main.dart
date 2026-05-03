@@ -4,9 +4,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FavoritesStore().loadFromDisk();
   runApp(const MyApp());
 }
 
@@ -377,6 +380,24 @@ class FavoritesStore {
 
   final List<Song> favorites = [];
 
+  /// Call once at app startup to restore saved favorites from device storage
+  Future<void> loadFromDisk() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getStringList('favorites') ?? [];
+    favorites.clear();
+    for (final item in raw) {
+      try {
+        favorites.add(Song.fromJson(json.decode(item)));
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _saveToDisk() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = favorites.map((s) => json.encode(s.toJson())).toList();
+    await prefs.setStringList('favorites', raw);
+  }
+
   bool isFavorite(Song song) => favorites.any((s) => s.audio == song.audio);
 
   void toggle(Song song) {
@@ -385,6 +406,7 @@ class FavoritesStore {
     } else {
       favorites.add(song);
     }
+    _saveToDisk(); // persist every change immediately
   }
 }
 
@@ -599,16 +621,11 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                // All Songs — new icon: headphones
                 ListTile(
-                  leading: Icon(
-                    Icons.music_note,
-                    color: theme.accentLight,
-                  ),
+                  leading: Icon(Icons.music_note, color: theme.accentLight),
                   title: const Text("All Songs"),
                   onTap: () => Navigator.pop(context),
                 ),
-                // About — new icon: info_outline rounded
                 ListTile(
                   leading: Icon(
                     Icons.tips_and_updates_rounded,
@@ -623,7 +640,6 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
-                // Exclusive — new icon: workspace_premium
                 ListTile(
                   leading: Icon(
                     Icons.workspace_premium_rounded,
@@ -638,7 +654,6 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
-                // NEW: Settings
                 ListTile(
                   leading: Icon(Icons.settings, color: theme.accentLight),
                   title: const Text("Settings"),
@@ -682,7 +697,6 @@ class _SettingsPageState extends State<SettingsPage> {
   final themeStore = AppThemeStore();
   final reminderStore = ReminderStore();
 
-  // Notification reminder state
   bool _notifEnabled = false;
   int _selectedHours = 0;
   int _selectedMinutes = 30;
@@ -763,7 +777,6 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
-            // ---- SECTION: Change Theme ----
             _sectionHeader(
               icon: Icons.palette_rounded,
               label: "Change Theme",
@@ -784,7 +797,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Theme grid
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
@@ -867,7 +879,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     }),
                   ),
                   const SizedBox(height: 14),
-                  // Current theme indicator
                   Row(
                     children: [
                       Container(
@@ -901,7 +912,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const SizedBox(height: 24),
 
-            // ---- SECTION: Notifications / Reminder ----
             _sectionHeader(
               icon: Icons.notifications_active_rounded,
               label: "Reminder",
@@ -955,7 +965,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
                   const SizedBox(height: 18),
 
-                  // Hours picker
                   _intervalRow(
                     label: "Hours",
                     icon: Icons.hourglass_top_rounded,
@@ -966,7 +975,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     theme: theme,
                   ),
                   const SizedBox(height: 4),
-                  // Minutes picker
                   _intervalRow(
                     label: "Minutes",
                     icon: Icons.timer_rounded,
@@ -979,7 +987,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
                   const SizedBox(height: 20),
 
-                  // Preview label
                   Center(
                     child: Text(
                       _selectedHours == 0 && _selectedMinutes == 0
@@ -995,7 +1002,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
                   const SizedBox(height: 14),
 
-                  // Set reminder button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -1099,7 +1105,6 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Top row: icon + label + stepper controls
         Row(
           children: [
             Icon(icon, size: 18, color: Colors.white54),
@@ -1111,7 +1116,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
             ),
-            // Decrement
             IconButton(
               onPressed: value > min ? () => onChanged(value - 1) : null,
               icon: const Icon(Icons.remove_circle_outline_rounded),
@@ -1121,7 +1125,6 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.all(4),
             ),
             const SizedBox(width: 6),
-            // Value display
             Container(
               width: 52,
               alignment: Alignment.center,
@@ -1141,7 +1144,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(width: 6),
-            // Increment
             IconButton(
               onPressed: value < max ? () => onChanged(value + 1) : null,
               icon: const Icon(Icons.add_circle_outline_rounded),
@@ -1152,7 +1154,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
         ),
-        // Bottom row: quick preset chips indented under label
         Padding(
           padding: const EdgeInsets.only(left: 78, top: 6, bottom: 2),
           child: Row(
@@ -2261,22 +2262,25 @@ class _PlayerPageState extends State<PlayerPage> {
             ),
             const Spacer(),
             Padding(
-            padding: const EdgeInsets.only(bottom: 40), // reduce this if there's spacing above
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Plug in 🎧", style: TextStyle(color: Colors.grey)),
-                TextButton(
-                  onPressed: () {
-                    launchUrl(
-                      Uri.parse("https://www.youtube.com/@mr.informative"),
-                    );
-                  },
-                  child: const Text("Visit YouTube 🚀 "),
-                ),
-              ],
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Plug in 🎧",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      launchUrl(
+                        Uri.parse("https://www.youtube.com/@mr.informative"),
+                      );
+                    },
+                    child: const Text("Visit YouTube 🚀 "),
+                  ),
+                ],
+              ),
             ),
-            )
           ],
         ),
       ),
@@ -2342,7 +2346,10 @@ class LinksPage extends StatelessWidget {
       subtitle: "Official website of Mr Informative 🧿",
       url: "https://www.youtube.com/@mr.informative",
       icon: Icons.language_rounded,
-      colors: [Color.fromARGB(255, 61, 109, 221), Color.fromARGB(255, 10, 86, 238)],
+      colors: [
+        Color.fromARGB(255, 61, 109, 221),
+        Color.fromARGB(255, 10, 86, 238),
+      ],
     ),
     _LinkItem(
       label: "Instagram",
@@ -2359,7 +2366,10 @@ class LinksPage extends StatelessWidget {
       subtitle: "Visit more from us! 🛍️",
       url: "https://vaibhavvkumarr.github.io/mrinfor",
       symbol: "🛍️",
-      colors: [Color.fromARGB(255, 221, 254, 34), Color.fromARGB(255, 209, 250, 3)],
+      colors: [
+        Color.fromARGB(255, 221, 254, 34),
+        Color.fromARGB(255, 209, 250, 3),
+      ],
     ),
     _LinkItem(
       label: "Developer 👨🏻‍💻",
