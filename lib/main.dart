@@ -380,7 +380,6 @@ class FavoritesStore {
 
   final List<Song> favorites = [];
 
-  /// Call once at app startup to restore saved favorites from device storage
   Future<void> loadFromDisk() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getStringList('favorites') ?? [];
@@ -406,7 +405,7 @@ class FavoritesStore {
     } else {
       favorites.add(song);
     }
-    _saveToDisk(); // persist every change immediately
+    _saveToDisk();
   }
 }
 
@@ -421,7 +420,6 @@ class ReminderStore {
   int intervalMinutes = 0;
   Timer? _timer;
 
-  /// Callback to show a snackbar / dialog (set by SettingsPage)
   void Function(String message)? onReminder;
 
   void start(void Function(String) callback) {
@@ -662,6 +660,21 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const SettingsPage()),
+                    );
+                  },
+                ),
+                // ── NEW: Partners ──
+                ListTile(
+                  leading: Icon(
+                    Icons.groups_rounded,
+                    color: theme.accentLight,
+                  ),
+                  title: const Text("Partners"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PartnersPage()),
                     );
                   },
                 ),
@@ -2364,7 +2377,7 @@ class LinksPage extends StatelessWidget {
     _LinkItem(
       label: "Products",
       subtitle: "Visit more from us! 🛍️",
-      url: "https://vaibhavvkumarr.github.io/mrinfor",
+      url: "https://vaibhavvkumarr.github.io/mrinformativeonair/products.html",
       symbol: "🛍️",
       colors: [
         Color.fromARGB(255, 221, 254, 34),
@@ -2540,6 +2553,369 @@ class LinksPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ================= PARTNERS PAGE =================
+class PartnersPage extends StatelessWidget {
+  const PartnersPage({super.key});
+
+  // 🔁 Replace with your actual Google Form URL
+  static const String _googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd3heghBi1axs2Nal-7eW6cinnY9ZzmahTIt_Zjbgnss_MMFg/viewform";
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text("Partners"),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0C0B14), Color(0xFF17142A), Color(0xFF0B101D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+            children: [
+              // ── Hero card ──
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.deepPurple.withOpacity(0.45),
+                      Colors.indigo.withOpacity(0.20),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: Border.all(
+                    color: Colors.deepPurpleAccent.withOpacity(0.30),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      "🤝 Advertise With Us",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "In app brand promotions. Reach millions of mindful listeners every day. "
+                      "Partner with Binaural Beats MindHz and put your brand "
+                      "in front of a highly engaged wellness audience.",
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        height: 1.6,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── Section title ──
+              const Text(
+                "Why partner with us?",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // ── Stats strip ──
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 18,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white.withOpacity(0.05),
+                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: const [
+                    _StatBadge(value: "205K+", label: "Monthly Viewers"),
+                    _StatBadge(value: "90K+", label: "Instagram Family"),
+                    _StatBadge(value: "54M+", label: "Views On YouTube"),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+
+
+              // ── Perks ──
+              const _PerkItem(
+                emoji: "🎯",
+                title: "Targeted Wellness Audience",
+                body:
+                    "Our users are health conscious, mindful individuals actively "
+                    "seeking focus, sleep improvement & stress relief a premium niche "
+                    "with high purchasing intent.",
+                gradientColors: [
+                  Color(0xFF6B21A8),
+                  Color(0xFF3730A3),
+                ],
+                gradientOpacity: 0.35,
+              ),
+              const _PerkItem(
+                emoji: "📈",
+                title: "High Engagement Rate",
+                body:
+                    "Users spend 20 to 40 minutes per session with the app open and "
+                    "audio playing with giving your ad maximum dwell time and recall.",
+                gradientColors: [
+                  Color(0xFF0369A1),
+                  Color(0xFF0E7490),
+                ],
+                gradientOpacity: 0.35,
+              ),
+              const _PerkItem(
+                emoji: "🌍",
+                title: "Fast Growing Userbase",
+                body:
+                    "Predominantly globally audience with strong tier one city presence "
+                    "ideal for brands targeting the fast growing wellness & "
+                    "digital lifestyle market.",
+                gradientColors: [
+                  Color(0xFF065F46),
+                  Color(0xFF0F766E),
+                ],
+                gradientOpacity: 0.35,
+              ),
+              // const _PerkItem(
+              //   emoji: "💡",
+              //   title: "Multiple Ad Formats",
+              //   body:
+              //       "In-app banners, sponsored playlist cards, push notification "
+              //       "shoutouts, and drawer-level brand placements — flexible packages "
+              //       "to suit every budget.",
+              //   gradientColors: [
+              //     Color(0xFF92400E),
+              //     Color(0xFFC2410C),
+              //   ],
+              //   gradientOpacity: 0.35,
+              // ),
+              // const _PerkItem(
+              //   emoji: "⚡",
+              //   title: "Fast Turnaround",
+              //   body:
+              //       "Campaigns go live within 48–72 hours of approval. "
+              //       "Real-time performance reports shared weekly so you always "
+              //       "know your ROI.",
+              //   gradientColors: [
+              //     Color(0xFF78350F),
+              //     Color(0xFFB45309),
+              //   ],
+              //   gradientOpacity: 0.35,
+              // ),
+              const _PerkItem(
+                emoji: "🔒",
+                title: "Brand-Safe Environment",
+                body:
+                    "Our content is 100% positive, calm and wellness focused. "
+                    "No controversial topics yes your brand is always in good company.",
+                gradientColors: [
+                  Color(0xFF9D174D),
+                  Color(0xFF7F1D1D),
+                ],
+                gradientOpacity: 0.35,
+              ),
+
+              const SizedBox(height: 28),
+
+              // ── Stats strip ──
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 18,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white.withOpacity(0.05),
+                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: const [
+                    _StatBadge(value: "30+", label: "Tracks"),
+                    _StatBadge(value: "10K+", label: "Users"),
+                    _StatBadge(value: "30m", label: "Avg. Session"),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // ── CTA ──
+              const Text(
+                "Interested? Let's talk.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                "Fill in a quick form and we'll get back to you within 24 hours.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: Colors.white38),
+              ),
+              const SizedBox(height: 18),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => launchUrl(Uri.parse(_googleFormUrl)),
+                  icon: const Icon(Icons.send_rounded),
+                  label: const Text("Contact Us"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7C3AED),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+              const Text(
+                "📬 We respond within 24 hours on business days.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11, color: Colors.white30),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Perk card widget ──
+class _PerkItem extends StatelessWidget {
+  final String emoji;
+  final String title;
+  final String body;
+  final List<Color> gradientColors;
+  final double gradientOpacity;
+
+  const _PerkItem({
+    required this.emoji,
+    required this.title,
+    required this.body,
+    required this.gradientColors,
+    this.gradientOpacity = 0.30,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            gradientColors[0].withOpacity(gradientOpacity),
+            gradientColors[1].withOpacity(gradientOpacity * 0.5),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: Colors.white.withOpacity(0.07)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  body,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.55,
+                    color: Colors.white60,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Stat badge widget ──
+class _StatBadge extends StatelessWidget {
+  final String value;
+  final String label;
+
+  const _StatBadge({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Colors.white54),
+        ),
+      ],
     );
   }
 }
