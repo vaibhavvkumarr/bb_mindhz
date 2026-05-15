@@ -2706,32 +2706,7 @@ class PartnersPage extends StatelessWidget {
                 ],
                 gradientOpacity: 0.35,
               ),
-              // const _PerkItem(
-              //   emoji: "💡",
-              //   title: "Multiple Ad Formats",
-              //   body:
-              //       "In-app banners, sponsored playlist cards, push notification "
-              //       "shoutouts, and drawer-level brand placements — flexible packages "
-              //       "to suit every budget.",
-              //   gradientColors: [
-              //     Color(0xFF92400E),
-              //     Color(0xFFC2410C),
-              //   ],
-              //   gradientOpacity: 0.35,
-              // ),
-              // const _PerkItem(
-              //   emoji: "⚡",
-              //   title: "Fast Turnaround",
-              //   body:
-              //       "Campaigns go live within 48–72 hours of approval. "
-              //       "Real-time performance reports shared weekly so you always "
-              //       "know your ROI.",
-              //   gradientColors: [
-              //     Color(0xFF78350F),
-              //     Color(0xFFB45309),
-              //   ],
-              //   gradientOpacity: 0.35,
-              // ),
+              
               const _PerkItem(
                 emoji: "🔒",
                 title: "Brand-Safe Environment",
