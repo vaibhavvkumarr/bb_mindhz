@@ -1364,6 +1364,11 @@ class TrendingTab extends StatefulWidget {
 class _TrendingTabState extends State<TrendingTab> {
   List<Song> trendingSongs = [];
 
+  // ── Live listener counter ──
+  int _liveListeners = 0;
+  Timer? _liveTimer;
+  final Random _random = Random();
+
   @override
   void didUpdateWidget(TrendingTab oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1376,11 +1381,45 @@ class _TrendingTabState extends State<TrendingTab> {
   void initState() {
     super.initState();
     if (widget.songs.isNotEmpty) _pickRandom();
+    // Start with a random value in range
+    _liveListeners = 5000 + _random.nextInt(10001);
+    // Update every second with a small random fluctuation
+    _liveTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      // Fluctuate by ±300 but clamp strictly between 5000–15000
+      final delta = _random.nextInt(601) - 300; // -300 to +300
+      setState(() {
+        _liveListeners = (_liveListeners + delta).clamp(5000, 15000);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _liveTimer?.cancel();
+    super.dispose();
   }
 
   void _pickRandom() {
     final shuffled = List<Song>.from(widget.songs)..shuffle(Random());
     setState(() => trendingSongs = shuffled.take(5).toList());
+  }
+
+  /// Format number with comma separator e.g. 12345 → "12,345"
+  String _formatCount(int n) {
+    final s = n.toString();
+    if (s.length <= 3) return s;
+    final buf = StringBuffer();
+    final mod = s.length % 3;
+    if (mod != 0) {
+      buf.write(s.substring(0, mod));
+      if (s.length > mod) buf.write(',');
+    }
+    for (int i = mod; i < s.length; i += 3) {
+      buf.write(s.substring(i, i + 3));
+      if (i + 3 < s.length) buf.write(',');
+    }
+    return buf.toString();
   }
 
   @override
@@ -1405,34 +1444,98 @@ class _TrendingTabState extends State<TrendingTab> {
             ),
             border: Border.all(color: Colors.orange.withOpacity(0.2)),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("🔥", style: TextStyle(fontSize: 28)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "Trending Now",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+              // ── Top row: flame + title + refresh ──
+              Row(
+                children: [
+                  const Text("🔥", style: TextStyle(fontSize: 28)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          "Trending Now",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          "Click Refresh to get live charts 🔺",
+                          style: TextStyle(color: Colors.white60, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: _pickRandom,
+                    icon: const Icon(Icons.shuffle, size: 16),
+                    label: const Text("Refresh"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.orangeAccent,
+                    ),
+                  ),
+                ],
+              ),
+
+              // ── Live listener counter ──
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.black.withOpacity(0.25),
+                  border: Border.all(
+                    color: Colors.greenAccent.withOpacity(0.30),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Animated pulsing green dot
+                    _PulsingDot(),
+                    const SizedBox(width: 8),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      transitionBuilder: (child, animation) => FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.3),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                      ),
+                      child: Text(
+                        _formatCount(_liveListeners),
+                        key: ValueKey(_liveListeners),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.greenAccent,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-                    Text(
-                      "Click Refresh to get live charts 🔺",
-                      style: TextStyle(color: Colors.white60, fontSize: 13),
+                    const SizedBox(width: 6),
+                    const Text(
+                      "listening now",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white60,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
+                    const SizedBox(width: 6),
+                    const Text("🎧", style: TextStyle(fontSize: 14)),
                   ],
-                ),
-              ),
-              TextButton.icon(
-                onPressed: _pickRandom,
-                icon: const Icon(Icons.shuffle, size: 16),
-                label: const Text("Refresh"),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.orangeAccent,
                 ),
               ),
             ],
@@ -1550,6 +1653,69 @@ class _TrendingTabState extends State<TrendingTab> {
           );
         }),
       ],
+    );
+  }
+}
+
+// ================= PULSING GREEN DOT =================
+class _PulsingDot extends StatefulWidget {
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnim;
+  late Animation<double> _opacityAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+
+    _scaleAnim = Tween<double>(begin: 0.7, end: 1.3).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _opacityAnim = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) => Opacity(
+        opacity: _opacityAnim.value,
+        child: Transform.scale(
+          scale: _scaleAnim.value,
+          child: Container(
+            width: 9,
+            height: 9,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.greenAccent,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.greenAccent.withOpacity(0.6),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -2664,8 +2830,6 @@ class PartnersPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 28),
-
-
 
               // ── Perks ──
               const _PerkItem(
